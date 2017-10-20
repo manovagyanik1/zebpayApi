@@ -1,0 +1,19 @@
+{
+  "name": "zebpayapi",
+  "version": "1.0.0",
+  "description": "zebpay api alerts",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/manovagyanik1/zebpayApi.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/manovagyanik1/zebpayApi/issues"
+  },
+  "homepage": "https://github.com/manovagyanik1/zebpayApi#readme"
+}
