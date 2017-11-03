@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript">
+  setTimeout(function () { location.reload(true); }, 15000);
+</script>
+<body>
+
+<div style="text-align: center; font-size: 52px" id="difference"></div>
+
+<div id="container" style="width:100%; height:800px;"></div>
+
+</body>
+
+<script>
+    $(function () {
+    function readData() {
+        return $.ajax({
+            type: "GET",
+            url: 'datadump.json',
+            async: false
+        }).responseText;
+    }
+
+    var data = readData();
+    data = JSON.parse(data);
+
+    var chartData = {
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Bitcoin Prices'
+        },
+        xAxis: {
+            categories: []
+        },
+        yAxis: {
+            title: {
+                text: 'Fruit eaten'
+            }
+        },
+        series: []
+    };
+
+    for(var wallet in data){
+        for(var price_type in data[wallet]){
+            var name = wallet + '-' + price_type;
+            var datas =data[wallet][price_type];
+            var showDatas = datas.map(data => data.price);
+            chartData.series.push({
+                name: name,
+                data: showDatas,
+            })
+        }
+    }
+    var myChart = Highcharts.chart('container', chartData);
+});
+</script>
+</html>
