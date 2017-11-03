@@ -30,15 +30,11 @@ cron.schedule('*/10 * * * * *', function(){
         console.log(FgGreen, "sell:", sellValue);
         console.log(Reset, "********************");
 
-        if(buyValueInInteger > 493000) {
-            say.speak("alert negative: buy value is more than 493,000");
-        } else if (buyValueInInteger < 487000) {
-            say.speak("alert positive: buy value is less than 486,000");
+        if (buyValueInInteger < 485000) {
+            say.speak("alert: buy value is less than 485,000");
         }
-        if(sellValueInInteger > 490000) {
-            say.speak("alert negative: sell value is greater than 490,000");
-        } else if(sellValueInInteger > 490000) {
-            say.speak("alert: sell value is greater than 490,000");
+        if(sellValueInInteger > 500000) {
+            say.speak("alert: sell value is greater than 500,000");
         }
     })
     .catch(function (err) {
