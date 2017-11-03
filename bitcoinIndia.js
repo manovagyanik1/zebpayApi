@@ -22,14 +22,23 @@ cron.schedule('*/10 * * * * *', function(){
   rp(options)
     .then(function ($) {
         const buyValue = $("#buyvalue").html();
+        const sellValue = $("#sellvalue").html();
         const buyValueInInteger = parseInt(buyValue, 10);
+        const sellValueInInteger = parseInt(sellValue, 10);
 
-        console.log(FgWhite, "buy: ", $("#buyvalue").html());
-        console.log(FgGreen, "sell:", $("#sellvalue").html());
+        console.log(FgWhite, "buy: ", buyValue);
+        console.log(FgGreen, "sell:", sellValue);
         console.log(Reset, "********************");
 
-        if(buyValueInInteger < 493000) {
-            say.speak("alert: buy value is less than 493,000");
+        if(buyValueInInteger > 493000) {
+            say.speak("alert negative: buy value is more than 493,000");
+        } else if (buyValueInInteger < 487000) {
+            say.speak("alert positive: buy value is less than 486,000");
+        }
+        if(sellValueInInteger > 490000) {
+            say.speak("alert negative: sell value is greater than 490,000");
+        } else if(sellValueInInteger > 490000) {
+            say.speak("alert: sell value is greater than 490,000");
         }
     })
     .catch(function (err) {
