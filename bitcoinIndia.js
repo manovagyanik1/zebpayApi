@@ -9,7 +9,7 @@ var FgBlue = "\x1b[34m";
 var FgWhite = "\x1b[37m";
 var Reset = "\x1b[0m";
 
-console.log("Starting program");
+console.log("Starting bitCoinIndia");
 var options = {
   uri: "https://bitcoin-india.org/",
     transform: function (body) {
