@@ -2,7 +2,7 @@ var request = require("request");
 var rp = require('request-promise');
 var cheerio = require("cheerio");
 var cron = require('node-cron');
-var say = require('say');
+// var say = require('say');
 const fs = require('fs');
 
 var FgGreen = "\x1b[32m";
