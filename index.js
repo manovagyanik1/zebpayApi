@@ -2,7 +2,7 @@ var request = require("request");
 var rp = require('request-promise');
 var cheerio = require("cheerio");
 var cron = require('node-cron');
-// var say = require('say');
+var say = require('say');
 const fs = require('fs');
 
 var FgGreen = "\x1b[32m";
@@ -11,6 +11,7 @@ var FgBlue = "\x1b[34m";
 var FgWhite = "\x1b[37m";
 var Reset = "\x1b[0m";
 var objDump = null;
+var USDTOINR = 64.67;
 
 function getInt(x, time) {
     var val = parseInt(x, 10);
@@ -28,6 +29,9 @@ function checkForFile(fileName,callback)
         }else {
             var obj = {
                 coinbase: {
+                    buy: []
+                },
+                coindesk: {
                     buy: []
                 },
                 zebpay: {
@@ -66,20 +70,64 @@ var optionsZebPay = {
   json: true
 };
 
+var optionsCoinDesk = {
+  uri: "https://api.coindesk.com/v1/bpi/currentprice.json",
+  json: true
+};
+
 var optionsCoinbase = {
   uri: "https://api.coinbase.com/v2/prices/spot?currency=INR",
   json: true
 };
 
-function alert() {
-    // if (buyValueInInteger < 485000) {
-    //     say.speak("alert: buy value is less than 485,000");
-    // }
-    // if(sellValueInInteger > 500000) {
-    //     say.speak("alert: sell value is greater than 500,000");
-    // }
-        //     const buyValueInInteger = parseInt(buyValue, 10);
-        // const sellValueInInteger = parseInt(sellValue, 10);
+function checkForAlert(arr, exchange) {
+    var min = 100000000000; var max = 0;
+    var THRESOLD = 1800;
+
+    arr.map(el => {
+        var price = el.price;
+        if(price > max)
+            max = price;
+
+        if(price < min) 
+            min = price;
+    });
+    if(exchange == "coinbase") {
+        THRESOLD = 1000;
+    }
+
+    if(max - min > THRESOLD) {
+        console.log("exchange: " + exchange);
+        say.speak(exchange);
+        console.log("min " + min);
+        console.log("max " + max);
+    }
+}
+
+function check(objDump) {
+    // get last 5 results and check for max min
+    var zebpay = objDump.zebpay;
+    var bci = objDump.bci;
+    var coinbase = objDump.coinbase;
+    var coindesk = objDump.coindesk;
+    var minSize = 5;
+    if(size <= minSize) {
+        return; // no alert
+    }
+    var size = zebpay.buy.length;
+    var zbuy = zebpay.buy.slice(size - minSize , size);
+    var zsell = zebpay.sell.slice(size - minSize , size);
+    var bbuy = bci.buy.slice(size - minSize , size);
+    var bsell = bci.sell.slice(size - minSize , size);
+    var cbase = coinbase.buy.slice(size - minSize , size);
+    var cdesk = coindesk.buy.slice(size - minSize , size);
+
+    checkForAlert(zbuy, "zebpay buy");
+    checkForAlert(zsell, "zebpay sell");
+    checkForAlert(bbuy, "bitcoin india buy");
+    checkForAlert(bsell, "bitcoin india sell");
+    checkForAlert(cbase, "coinbase");
+    checkForAlert(cdesk, "coinbase");
 }
 
 cron.schedule('*/10 * * * * *', function(){
@@ -102,6 +150,14 @@ cron.schedule('*/10 * * * * *', function(){
        console.log("error occured");
     });
 
+  var coindesk =  rp(optionsCoinDesk)
+    .then(function (obj) {
+        coindeskBuy = obj.bpi.USD.rate_float * USDTOINR;
+    })
+    .catch(function (err) {
+       console.log("error occured");
+    });
+
   var coinbase =  rp(optionsCoinbase)
     .then(function (obj) {
         coinbaseBuy = obj.data.amount;
@@ -110,18 +166,22 @@ cron.schedule('*/10 * * * * *', function(){
        console.log("error occured");
     });
 
-    Promise.all([bci, zeb, coinbase])
+    Promise.all([bci, zeb, coinbase, coindesk])
     .then(values => { 
         console.log(FgWhite, "bcibuy: ", bciBuy, "  bciSell: ", bciSell);
         console.log(FgGreen, "zebBuy:  ", zebBuy, "  zebsell:  ", zebsell);
         console.log(FgWhite, "coinbaseBuy: ", coinbaseBuy);    
+        console.log(FgWhite, "coindeskBuy: ", coindeskBuy);    
         console.log(Reset, "*********************************************");
         var time = Date.now();
         objDump.coinbase.buy.push(getInt(coinbaseBuy, time));
+        objDump.coindesk.buy.push(getInt(coindeskBuy, time));
+        
         objDump.zebpay.buy.push(getInt(zebBuy, time));
         objDump.zebpay.sell.push(getInt(zebsell, time));
         objDump.bci.buy.push(getInt(bciBuy, time));
         objDump.bci.sell.push(getInt(bciSell, time));
+        check(objDump);
         fs.writeFileSync('./datadump.json', JSON.stringify(objDump, null, 2) , 'utf-8');
     });
 });
