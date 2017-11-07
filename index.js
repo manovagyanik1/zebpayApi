@@ -110,7 +110,7 @@ function check(objDump) {
     var bci = objDump.bci;
     var coinbase = objDump.coinbase;
     var coindesk = objDump.coindesk;
-    var minSize = 5;
+    var minSize = 3;
     if(size <= minSize) {
         return; // no alert
     }
