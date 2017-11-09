@@ -11,7 +11,9 @@ var FgBlue = "\x1b[34m";
 var FgWhite = "\x1b[37m";
 var Reset = "\x1b[0m";
 var objDump = null;
-var USDTOINR = 64.67;
+var USDTOINR = 65.02;
+
+var TRIM_SIZE = 100;
 
 function getInt(x, time) {
     var val = parseInt(x, 10);
@@ -19,6 +21,13 @@ function getInt(x, time) {
         timestamp: time,
         price: val
     }
+}
+
+function trim(item) {
+    if(item.length < TRIM_SIZE) {
+        return item;
+    }
+    return item.slice(item.length - TRIM_SIZE, item.length);
 }
 
 function checkForFile(fileName,callback)
@@ -176,11 +185,19 @@ cron.schedule('*/10 * * * * *', function(){
         var time = Date.now();
         objDump.coinbase.buy.push(getInt(coinbaseBuy, time));
         objDump.coindesk.buy.push(getInt(coindeskBuy, time));
-        
         objDump.zebpay.buy.push(getInt(zebBuy, time));
         objDump.zebpay.sell.push(getInt(zebsell, time));
         objDump.bci.buy.push(getInt(bciBuy, time));
         objDump.bci.sell.push(getInt(bciSell, time));
+
+        objDump.coinbase.buy = trim(objDump.coinbase.buy);
+        objDump.coindesk.buy = trim(objDump.coindesk.buy);
+        objDump.zebpay.buy = trim(objDump.zebpay.buy);
+        objDump.zebpay.sell = trim(objDump.zebpay.sell);
+        objDump.bci.buy = trim(objDump.bci.buy);
+        objDump.bci.sell = trim(objDump.bci.sell);
+
+
         check(objDump);
         fs.writeFileSync('./datadump.json', JSON.stringify(objDump, null, 2) , 'utf-8');
     });
